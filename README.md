@@ -1,8 +1,8 @@
 # YoutubeCatchUp
 
-# To run:
+## To run this project:
 
-## Setup credentials:
+### Setup credentials:
 - Use [this wizard](https://console.developers.google.com/flows/enableapi?apiid=youtube) to create or select a project in the Google Developers Console and automatically turn on the API. Click Continue, then Go to credentials.
 - On the Add credentials to your project page, click the Cancel button.
 - At the top of the page, select the OAuth consent screen tab. Select an Email address, enter a Product name if not already set, and click the Save button.
@@ -12,7 +12,7 @@
 - Click the file_download (Download JSON) button to the right of the client ID.
 - Move the downloaded file to your working directory and rename it client_secret.json.
 
-## Run with node
+### Run with node
 - Clone the repo and move the client_secrets.json file into the same folder
 - Move to the directory and run these commands to install the following libraries:
     - npm install googleapis --save
