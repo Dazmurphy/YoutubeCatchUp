@@ -1,8 +1,8 @@
 # YoutubeCatchUp
 
-## To run this project:
+## To run this project
 
-### Setup credentials:
+### Setup credentials
 - Use [this wizard](https://console.developers.google.com/flows/enableapi?apiid=youtube) to create or select a project in the Google Developers Console and automatically turn on the API. Click Continue, then Go to credentials.
 - On the Add credentials to your project page, click the Cancel button.
 - At the top of the page, select the OAuth consent screen tab. Select an Email address, enter a Product name if not already set, and click the Save button.
