@@ -10,8 +10,11 @@ var TOKEN_DIR = (process.env.HOME || process.env.HOMEPATH ||
     process.env.USERPROFILE) + '/.credentials/';
 var TOKEN_PATH = TOKEN_DIR + 'youtubecatchup.json';
 
+var playlistFileName = './playlist_details.json';
+var playlistFile = require(playlistFileName);
+
 // Load client secrets from a local file.
-fs.readFile('client_secret.json', function processClientSecrets(err, content) {
+fs.readFile('client_secrets.json', function processClientSecrets(err, content) {
   if (err) {
     console.log('Error loading client secret file: ' + err);
     return;
@@ -97,6 +100,26 @@ function storeToken(token) {
 }
 
 async function updatePlaylist(auth){
+    // take input to check if want to add new playlist, or just update current one
+    var skip = await GetUserInput('Would you like to skip adding a new playlist (y/n): ');
+
+    if(skip.toLowerCase() === 'n'){
+        var playlistName = await GetUserInput('Enter the title of your playlist to add to: ');
+        YCUPlaylistId = await GetPlaylistId(auth, playlistName);
+
+        // save playlistid to file
+        playlistFile.playlistId = YCUPlaylistId;
+
+        fs.writeFile(playlistFileName, JSON.stringify(playlistFile), function(err){
+            if (err) return console.log(err);
+            console.log(JSON.stringify(playlistFile));
+            console.log('writing to ' + playlistFileName);
+        });
+    }else{
+        // read playlistid from file
+
+    }
+
     // need to add the paging for this as there will often be much more than 50 in the playlist.
     var existingVideoIds = await GetExistingVideoIds(auth, YCUPlaylistId, 50);
     var channelVideoIds = [];
@@ -116,6 +139,19 @@ async function updatePlaylist(auth){
         var result = await AddToPlaylist(auth, YCUPlaylistId, videoId);
         console.log(result);
     }
+}
+
+async function GetUserInput(question){
+    var rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
+    return new Promise((resolve, reject) => {
+        rl.question(question, function(answer) {
+            rl.close();
+            resolve(answer);
+        });
+    });
 }
 
 async function GetExistingVideoIds(auth, playlistId, maxResults){
@@ -233,6 +269,32 @@ async function GetVideoDetails(auth, videoId){
     });
 }
 
+async function GetPlaylistId(auth, playlistTitle){
+    var service = google.youtube('v3');
+
+    return new Promise((resolve, reject) => {
+        service.playlists.list({
+            auth: auth,
+            part: 'snippet',
+            mine: true,
+            maxResults: 50
+        }, function(err, response){
+            if(err){
+                console.log('The API returned an error: ' + err);
+                return;
+            }
+
+            var result = response.data.items;
+
+            for(let playlist of result){
+                if(playlist.snippet.title.toLowerCase() === playlistTitle.toLowerCase()){
+                    resolve(playlist.id);
+                }
+            }
+        });
+    });
+}
+
 // WIP
 async function IsValidDuration(auth, videoId, limit){
     var videoDetails = await GetVideoDetails(auth, videoId);
@@ -249,6 +311,6 @@ var MrDeepSensePlaylistId = "UUQKAQuy1Rbj49rJMmiLigTg";
 var SelectedPlaylistId = "UUFZ75Bg73NJnJgmeUX9l62g";
 var SubSoulPlaylistId = "UUO3GgqahVfFg0w9LY2CBiFQ";
 
-var YCUPlaylistId = "PLp4ykc23uI9gwpAIiPGpk6dPAfdsmD9Cx";
+var YCUPlaylistId = "";
 
 var ChannelList = [AnjunaDeepPlaylistId, blancPlaylistId, defectedRecordsPlaylistId, MiaMendePlaylistId, MotivePlaylistId, MrDeepSensePlaylistId, SelectedPlaylistId, SubSoulPlaylistId];
