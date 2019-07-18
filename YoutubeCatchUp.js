@@ -110,16 +110,31 @@ async function updatePlaylist(auth){
         // save playlistid to file
         playlistFile.playlistId = YCUPlaylistId;
 
-        fs.writeFile(playlistFileName, JSON.stringify(playlistFile), function(err){
+        var quitFeed = false;
+
+        while(!quitFeed){
+            var channelName = await GetUserInput('Enter the name of the channel you wish to subscribe to or enter empty string to finish providing channel names: ');
+
+            if(channelName != ""){
+                ChannelList.push(channelName);
+            }else{
+                quitFeed = true;
+            }
+        }
+
+        playlistFile.channelList = ChannelList;
+
+        fs.writeFile(playlistFileName, JSON.stringify(playlistFile, null, 2), function(err){
             if (err) return console.log(err);
             console.log(JSON.stringify(playlistFile));
             console.log('writing to ' + playlistFileName);
         });
     }else{
         // read playlistid from file
-
+        var fileContents = JSON.parse(fs.readFileSync(playlistFileName));
+        YCUPlaylistId = fileContents.playlistId;
     }
-
+    return;
     // need to add the paging for this as there will often be much more than 50 in the playlist.
     var existingVideoIds = await GetExistingVideoIds(auth, YCUPlaylistId, 50);
     var channelVideoIds = [];
@@ -313,4 +328,5 @@ var SubSoulPlaylistId = "UUO3GgqahVfFg0w9LY2CBiFQ";
 
 var YCUPlaylistId = "";
 
-var ChannelList = [AnjunaDeepPlaylistId, blancPlaylistId, defectedRecordsPlaylistId, MiaMendePlaylistId, MotivePlaylistId, MrDeepSensePlaylistId, SelectedPlaylistId, SubSoulPlaylistId];
+//var ChannelList = [AnjunaDeepPlaylistId, blancPlaylistId, defectedRecordsPlaylistId, MiaMendePlaylistId, MotivePlaylistId, MrDeepSensePlaylistId, SelectedPlaylistId, SubSoulPlaylistId];
+var ChannelList = [];
