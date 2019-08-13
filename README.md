@@ -21,3 +21,4 @@
     - If you are not already logged into your Google account, you will be prompted to log in. If you are logged into multiple Google accounts, you will be asked to select one account to use for the authorization.
     - Click the Accept button.
     - Copy the code you're given, paste it into the command-line prompt, and press Enter.
+- After running you can check your playlist and it will be updated with the latest uploads from the channels you provided.
