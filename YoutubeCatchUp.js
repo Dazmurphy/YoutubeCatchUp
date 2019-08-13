@@ -145,16 +145,17 @@ async function updatePlaylist(auth){
         // looking at this now can probably just have one getPlaylistVideos instead of two
         var result = await GetChannelVideoIds(auth, channelPlaylistId, 5);
 
-        result.forEach(element => {
-            if(!existingVideoIds.includes(element) && IsValidDuration(auth, element, 10)){
-                channelVideoIds.push(element);
+        for(var res of result){
+            var isValid = await IsValidDuration(auth, res, 10);
+            if(!existingVideoIds.includes(res) && isValid){
+                channelVideoIds.push(res);
             }
-        });
+        }
     }
 
     for(let videoId of channelVideoIds){
         var result = await AddToPlaylist(auth, YCUPlaylistId, videoId);
-        console.log(result);
+        //console.log(result); used for showing result of adding the video to the playlist
     }
 }
 
@@ -336,15 +337,21 @@ async function GetChannelUploadsId(auth, channelName){
     });
 }
 
-// WIP
 async function IsValidDuration(auth, videoId, limit){
     var videoDetails = await GetVideoDetails(auth, videoId);
+    var duration = videoDetails.contentDetails.duration;
+    var regex = /[a-zA-Z]+/g;
+    var split = duration.split(regex);
 
-    if(videoDetails.contentDetails.duration != ""){
-        return true;
+    if(!duration.includes("H")){
+        split = split.filter(value => value != "");
+        var parsedVal = parseInt(split[0]);
+        //console.log("parsedVal: " + parsedVal + ", typeof: " + typeof(parsedVal) + ", limit: " + limit + ", typeof: " + typeof(limit));
+        console.log(parsedVal <= limit);
+        return (parsedVal <= limit);
+    }else{
+        return false;
     }
-
-    return false;
 }
 
 var AnjunaDeepPlaylistId = "UUbDgBFAketcO26wz-pR6OKA";
