@@ -101,9 +101,9 @@ function storeToken(token) {
 
 async function updatePlaylist(auth){
     // take input to check if want to add new playlist, or just update current one
-    var skip = await GetUserInput('Would you like to skip adding a new playlist (y/n): ');
+    var createNewPlaylist = await GetUserInput('Would you like to add a new playlist (y/n): ');
 
-    if(skip.toLowerCase() === 'n'){
+    if(createNewPlaylist.toLowerCase() === 'y'){
         var playlistName = await GetUserInput('Enter the title of your playlist to add to: ');
         YCUPlaylistId = await GetPlaylistId(auth, playlistName);
 
@@ -113,10 +113,11 @@ async function updatePlaylist(auth){
         var quitFeed = false;
 
         while(!quitFeed){
-            var channelName = await GetUserInput('Enter the name of the channel you wish to subscribe to or enter empty string to finish providing channel names: ');
+            var channelName = await GetUserInput('Enter the username (username may be different to channel name) of the channel you wish to subscribe to or enter empty string to finish providing channel names: ');
 
             if(channelName != ""){
-                ChannelList.push(channelName);
+                var channelId = await GetChannelUploadsId(auth, channelName);
+                ChannelList.push(channelId);
             }else{
                 quitFeed = true;
             }
@@ -133,8 +134,9 @@ async function updatePlaylist(auth){
         // read playlistid from file
         var fileContents = JSON.parse(fs.readFileSync(playlistFileName));
         YCUPlaylistId = fileContents.playlistId;
+        ChannelList = fileContents.channelList;
     }
-    return;
+
     // need to add the paging for this as there will often be much more than 50 in the playlist.
     var existingVideoIds = await GetExistingVideoIds(auth, YCUPlaylistId, 50);
     var channelVideoIds = [];
@@ -144,7 +146,7 @@ async function updatePlaylist(auth){
         var result = await GetChannelVideoIds(auth, channelPlaylistId, 5);
 
         result.forEach(element => {
-            if(!existingVideoIds.includes(element)){
+            if(!existingVideoIds.includes(element) && IsValidDuration(auth, element, 10)){
                 channelVideoIds.push(element);
             }
         });
@@ -310,11 +312,39 @@ async function GetPlaylistId(auth, playlistTitle){
     });
 }
 
+async function GetChannelUploadsId(auth, channelName){
+    // this only works if you have the official channel username
+    // channel title may be different
+    // will need a request to search the channel name otherwise
+    var service = google.youtube('v3');
+
+    return new Promise((resolve, reject) => {
+        service.channels.list({
+            auth: auth,
+            part: 'contentDetails',
+            forUsername: channelName,
+            maxResults: 5
+        }, function(err, response){
+            if(err){
+                console.log('The API returned an error: ' + err);
+                return;
+            }
+
+            var result = response.data.items;
+            resolve(result[0].contentDetails.relatedPlaylists.uploads);
+        });
+    });
+}
+
 // WIP
 async function IsValidDuration(auth, videoId, limit){
     var videoDetails = await GetVideoDetails(auth, videoId);
 
-    // perform logic to check if duration is less than 10 mins
+    if(videoDetails.contentDetails.duration != ""){
+        return true;
+    }
+
+    return false;
 }
 
 var AnjunaDeepPlaylistId = "UUbDgBFAketcO26wz-pR6OKA";

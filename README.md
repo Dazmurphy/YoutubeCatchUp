@@ -10,14 +10,12 @@
 - Select the application type Other, enter the name "YouTubeCatchUp", and click the Create button.
 - Click OK to dismiss the resulting dialog.
 - Click the file_download (Download JSON) button to the right of the client ID.
-- Move the downloaded file to your working directory and rename it client_secret.json.
+- Move the downloaded file to your working directory and rename it client_secrets.json.
 
 ### Run with node
-- Clone the repo and move the client_secrets.json file into the same folder
-- Move to the directory and run these commands to install the following libraries:
-    - npm install googleapis --save
-    - npm install google-auth-library --save
-- Run 'node YoutubeCatchUp.js'
+- Clone the repo and move the client_secrets.json file into the same folder.
+- Run 'npm install' to install the dependencies.
+- Run 'npm start' to run the tool.
 - The first time you run the file, it will prompt you to authorize access:
     - Browse to the provided URL in your web browser.
     - If you are not already logged into your Google account, you will be prompted to log in. If you are logged into multiple Google accounts, you will be asked to select one account to use for the authorization.

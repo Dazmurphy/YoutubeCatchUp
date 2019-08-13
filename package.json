@@ -1,0 +1,23 @@
+{
+  "name": "youtubecatchup",
+  "version": "1.0.0",
+  "description": "A CLI tool for keeping your youtube playlist up to date.",
+  "main": "YoutubeCatchUp.js",
+  "scripts": {
+    "start": "node .\\YoutubeCatchUp.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Dazmurphy/YoutubeCatchUp.git"
+  },
+  "author": "Darragh Murphy",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Dazmurphy/YoutubeCatchUp/issues"
+  },
+  "homepage": "https://github.com/Dazmurphy/YoutubeCatchUp#readme",
+  "dependencies": {
+    "google-auth-library": "^5.2.0",
+    "googleapis": "^42.0.0"
+  }
+}
