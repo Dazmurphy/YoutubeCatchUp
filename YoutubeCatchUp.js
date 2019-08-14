@@ -151,6 +151,8 @@ async function updatePlaylist(auth){
         ChannelList = fileContents.channelList;
     }
 
+    console.log("Adding new videos to playlist...");
+
     // need to add the paging for this as there will often be much more than 50 in the playlist.
     var existingVideoIds = await GetPlaylistVideoIds(auth, YCUPlaylistId, 50);
     var channelVideoIds = [];
@@ -169,6 +171,8 @@ async function updatePlaylist(auth){
     for(let videoId of channelVideoIds){
         var result = await AddToPlaylist(auth, YCUPlaylistId, videoId);
     }
+
+    console.log("Completed!");
 }
 
 async function GetUserInput(question){
