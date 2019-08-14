@@ -13,6 +13,20 @@ var TOKEN_PATH = TOKEN_DIR + 'youtubecatchup.json';
 var playlistFileName = './playlist_details.json';
 var playlistFile = require(playlistFileName);
 
+var service = google.youtube('v3');
+
+var AnjunaDeepPlaylistId = "UUbDgBFAketcO26wz-pR6OKA";
+var blancPlaylistId = "UU4w5l9jyqursG7wSEdNv3bQ";
+var defectedRecordsPlaylistId = "UUnOxaDXBiBXg9Nn9hKWu6aw";
+var MiaMendePlaylistId = "UUwfOfj7N-EBPjwnJC6JodKg";
+var MotivePlaylistId = "UUR4cuW35eyllwYml5Wwl2WQ";
+var MrDeepSensePlaylistId = "UUQKAQuy1Rbj49rJMmiLigTg";
+var SelectedPlaylistId = "UUFZ75Bg73NJnJgmeUX9l62g";
+var SubSoulPlaylistId = "UUO3GgqahVfFg0w9LY2CBiFQ";
+
+var YCUPlaylistId = "";
+var ChannelList = [];
+
 // Load client secrets from a local file.
 fs.readFile('client_secrets.json', function processClientSecrets(err, content) {
   if (err) {
@@ -138,12 +152,11 @@ async function updatePlaylist(auth){
     }
 
     // need to add the paging for this as there will often be much more than 50 in the playlist.
-    var existingVideoIds = await GetExistingVideoIds(auth, YCUPlaylistId, 50);
+    var existingVideoIds = await GetPlaylistVideoIds(auth, YCUPlaylistId, 50);
     var channelVideoIds = [];
 
     for(let channelPlaylistId of ChannelList){
-        // looking at this now can probably just have one getPlaylistVideos instead of two
-        var result = await GetChannelVideoIds(auth, channelPlaylistId, 5);
+        var result = await GetPlaylistVideoIds(auth, channelPlaylistId, 5);
 
         for(var res of result){
             var isValid = await IsValidDuration(auth, res, 10);
@@ -155,7 +168,6 @@ async function updatePlaylist(auth){
 
     for(let videoId of channelVideoIds){
         var result = await AddToPlaylist(auth, YCUPlaylistId, videoId);
-        //console.log(result); used for showing result of adding the video to the playlist
     }
 }
 
@@ -172,13 +184,12 @@ async function GetUserInput(question){
     });
 }
 
-async function GetExistingVideoIds(auth, playlistId, maxResults){
+async function GetPlaylistVideoIds(auth, playlistId, maxResults){
     // for when the playlist is really full I will have to add a next page token to the request
     // and keep making requests until no next page token is returned
     // this will then give the full list of videos added to the playlist
     // for now we can just use the 50 limit and one request for testing
 
-    var service = google.youtube('v3');
     return new Promise((resolve, reject) => {
         service.playlistItems.list({
             auth: auth,
@@ -202,41 +213,7 @@ async function GetExistingVideoIds(auth, playlistId, maxResults){
     });
 }
 
-function GetChannelVideoIds(auth, channelPlaylistId, maxResults){
-    // need to think about how to get these to call async and still add to the playlist
-    // maybe just make the request to see what's new in the channel
-    // check if it exists in the playlist and then add the it in the callback
-    // have a method for add video to playlist
-    // call it after get the videos of the channel and add all 5 new videos to the playlist
-
-    var service = google.youtube('v3');
-    // also check if the video length is under 10 minutes - needs another request to list video - duration
-    return new Promise((resolve, reject) => {
-        service.playlistItems.list({
-            auth: auth,
-            part: 'contentDetails',
-            playlistId: channelPlaylistId,
-            maxResults: maxResults,
-        }, function(err, response) {
-            if(err) {
-                console.log('The API returned an error: ' + err);
-                return;
-            }
-
-            var result = response.data.items;
-            var channelVideoIds = [];
-            for(let item of result){
-                channelVideoIds.push(item.contentDetails.videoId);
-            }
-
-            resolve(channelVideoIds);
-        });
-    });
-}
-
 async function AddToPlaylist(auth, playlistId, videoId){
-    var service = google.youtube('v3');
-
     return new Promise((resolve, reject) => {
         service.playlistItems.insert({
             auth: auth,
@@ -267,8 +244,6 @@ async function AddToPlaylist(auth, playlistId, videoId){
 }
 
 async function GetVideoDetails(auth, videoId){
-    var service = google.youtube('v3');
-
     return new Promise((resolve, reject) => {
         service.videos.list({
             auth: auth,
@@ -288,8 +263,6 @@ async function GetVideoDetails(auth, videoId){
 }
 
 async function GetPlaylistId(auth, playlistTitle){
-    var service = google.youtube('v3');
-
     return new Promise((resolve, reject) => {
         service.playlists.list({
             auth: auth,
@@ -317,8 +290,6 @@ async function GetChannelUploadsId(auth, channelName){
     // this only works if you have the official channel username
     // channel title may be different
     // will need a request to search the channel name otherwise
-    var service = google.youtube('v3');
-
     return new Promise((resolve, reject) => {
         service.channels.list({
             auth: auth,
@@ -346,24 +317,8 @@ async function IsValidDuration(auth, videoId, limit){
     if(!duration.includes("H")){
         split = split.filter(value => value != "");
         var parsedVal = parseInt(split[0]);
-        //console.log("parsedVal: " + parsedVal + ", typeof: " + typeof(parsedVal) + ", limit: " + limit + ", typeof: " + typeof(limit));
-        console.log(parsedVal <= limit);
         return (parsedVal <= limit);
     }else{
         return false;
     }
 }
-
-var AnjunaDeepPlaylistId = "UUbDgBFAketcO26wz-pR6OKA";
-var blancPlaylistId = "UU4w5l9jyqursG7wSEdNv3bQ";
-var defectedRecordsPlaylistId = "UUnOxaDXBiBXg9Nn9hKWu6aw";
-var MiaMendePlaylistId = "UUwfOfj7N-EBPjwnJC6JodKg";
-var MotivePlaylistId = "UUR4cuW35eyllwYml5Wwl2WQ";
-var MrDeepSensePlaylistId = "UUQKAQuy1Rbj49rJMmiLigTg";
-var SelectedPlaylistId = "UUFZ75Bg73NJnJgmeUX9l62g";
-var SubSoulPlaylistId = "UUO3GgqahVfFg0w9LY2CBiFQ";
-
-var YCUPlaylistId = "";
-
-//var ChannelList = [AnjunaDeepPlaylistId, blancPlaylistId, defectedRecordsPlaylistId, MiaMendePlaylistId, MotivePlaylistId, MrDeepSensePlaylistId, SelectedPlaylistId, SubSoulPlaylistId];
-var ChannelList = [];
