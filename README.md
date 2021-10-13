@@ -22,3 +22,6 @@
     - Click the Accept button.
     - Copy the code you're given, paste it into the command-line prompt, and press Enter.
 - After running you can check your playlist and it will be updated with the latest uploads from the channels you provided.
+
+## Note
+Youtube appear to have a feature to add videos manually to a queue now, so it makes this sort of redundant. But still useful if you want to automate it.
